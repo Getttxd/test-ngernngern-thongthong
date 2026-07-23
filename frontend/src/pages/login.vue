@@ -2,11 +2,6 @@
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 
-import miscMaskDark from '@images/misc/misc-mask-dark.png'
-import miscMaskLight from '@images/misc/misc-mask-light.png'
-import tree1 from '@images/misc/tree1.png'
-import tree3 from '@images/misc/tree3.png'
-
 import { VForm } from 'vuetify/components'
 
 definePage({
@@ -17,7 +12,6 @@ definePage({
 })
 
 const router = useRouter()
-const authThemeMask = useGenerateImageVariant(miscMaskLight, miscMaskDark)
 
 const isProcessing = ref(false)
 const refLoginForm = ref<VForm>()
@@ -35,19 +29,20 @@ async function onClickLogin() {
 </script>
 
 <template>
-  <div class="auth-wrapper d-flex align-center justify-center pa-4">
-    <VCard class="auth-card pa-sm-4 pa-md-7 pa-0" min-width="500">
+  <div class="auth-wrapper d-flex align-center justify-center pa-4" style="background: linear-gradient(135deg, #FFF5F7 0%, #FCE4EC 50%, #F8BBD0 100%); min-height: 100vh;">
+    <VCard class="auth-card pa-sm-4 pa-md-7 pa-0" min-width="420" elevation="0" rounded="xl" style="border: 1px solid #FADBE8;">
       <VCardText>
-        <div class="d-flex align-center gap-x-3 justify-center mb-6">
-          <VNodeRenderer :nodes="themeConfig.app.logo" />
-
-          <h1 class="auth-title">
-            {{ themeConfig.app.title.toLocaleUpperCase() }}
+        <div class="d-flex flex-column align-center mb-4">
+          <div class="text-center mb-3">
+            <VIcon icon="ri-wallet-3-line" size="48" color="#FF6B9D" />
+          </div>
+          <h1 class="text-h5 font-weight-bold" style="color: #2D1B2E;">
+            {{ themeConfig.app.title }}
           </h1>
+          <p class="text-body-2 mt-1 mb-0" style="color: #8A6B7A;">
+            จัดการรายรับ รายจ่ายของคุณ
+          </p>
         </div>
-        <p class="mb-0 text-center">
-          Standard System
-        </p>
       </VCardText>
 
       <VCardText>
@@ -61,6 +56,7 @@ async function onClickLogin() {
                 type="email"
                 :rules="[requiredValidator, emailValidator]"
                 placeholder="your@email.com"
+                variant="outlined"
               />
             </VCol>
 
@@ -72,48 +68,33 @@ async function onClickLogin() {
                 :rules="[requiredValidator]"
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
+                variant="outlined"
                 @click:append-inner="isPasswordVisible = !isPasswordVisible"
               />
 
               <div class="d-flex align-center flex-wrap justify-space-between my-5 gap-4" />
 
-              <VBtn block type="submit" :loading="isProcessing">
-                Login
+              <VBtn
+                block
+                type="submit"
+                :loading="isProcessing"
+                color="#FF6B9D"
+                size="large"
+                rounded="lg"
+                class="text-none"
+              >
+                เข้าสู่ระบบ
               </VBtn>
             </VCol>
           </VRow>
         </VForm>
       </VCardText>
+
+      <VCardText class="text-center pt-0">
+        <p class="text-caption" style="color: #8A6B7A;">
+          NgernNgern ThongThong — Personal Finance Tracker
+        </p>
+      </VCardText>
     </VCard>
-
-    <div class="d-flex gap-x-2 auth-footer-start-tree">
-      <img class="d-none d-md-block" :src="tree3" :height="120" :width="67">
-      <img
-        class="d-none d-md-block align-self-end"
-        :src="tree3"
-        :height="70"
-        :width="40"
-      >
-    </div>
-
-    <img
-      :src="tree1"
-      class="auth-footer-end-tree d-none d-md-block"
-      :width="97"
-      :height="210"
-    >
-
-    <!-- bg img -->
-    <img
-      class="auth-footer-mask d-none d-md-block"
-      :src="authThemeMask"
-      height="172"
-    >
-
-    <!-- Snackbar Message -->
   </div>
 </template>
-
-<style lang="scss">
-@use "@core/scss/template/pages/page-auth.scss";
-</style>

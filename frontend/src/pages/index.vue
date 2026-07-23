@@ -10,6 +10,10 @@ useSEO({
   keywords: ['finance', 'income', 'expense', 'tracker', 'ngernngern', 'thongthong'],
 })
 
+definePageMeta({
+  title: 'Dashboard',
+})
+
 const transactionStore = useTransactionStore()
 const categoryStore = useCategoryStore()
 
