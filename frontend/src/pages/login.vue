@@ -37,7 +37,7 @@ async function onClickLogin() {
             <VIcon icon="ri-wallet-3-line" size="48" color="#FF6B9D" />
           </div>
           <h1 class="text-h5 font-weight-bold" style="color: #2D1B2E;">
-            {{ themeConfig.app.title }}
+            NgernNgern ThongThong
           </h1>
           <p class="text-body-2 mt-1 mb-0" style="color: #8A6B7A;">
             จัดการรายรับ รายจ่ายของคุณ
