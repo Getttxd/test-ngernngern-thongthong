@@ -1,18 +1,41 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useSEO } from '@/composables/useSEO'
-import { useUserStore } from '@/stores/use-user-store'
+import { useTransactionStore } from '@/stores/use-transaction-store'
+import { useCategoryStore } from '@/stores/use-category-store'
 
 useSEO({
-  title: 'Dashboard - Starter',
-  description: 'Starter template overview.',
-  keywords: ['dashboard', 'starter', 'template'],
+  title: 'Dashboard - NgernNgern ThongThong',
+  description: 'Personal finance dashboard — track your income and expenses.',
+  keywords: ['finance', 'income', 'expense', 'tracker', 'ngernngern', 'thongthong'],
 })
 
-const userStore = useUserStore()
+const transactionStore = useTransactionStore()
+const categoryStore = useCategoryStore()
+
+const { totalIncome, totalExpense, balance, transactions } = storeToRefs(transactionStore)
+
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('th-TH', {
+    style: 'currency',
+    currency: 'THB',
+    minimumFractionDigits: 2,
+  }).format(amount)
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('th-TH', { dateStyle: 'medium' })
+}
+
+function getCategoryName(categoryId: string): string {
+  return categoryStore.categories.find(c => c.id === categoryId)?.name ?? categoryId
+}
 
 onMounted(async () => {
-  await userStore.fetchUsers()
+  await Promise.all([
+    transactionStore.fetchTransactions(),
+    categoryStore.fetchCategories(),
+  ])
 })
 </script>
 
@@ -21,15 +44,56 @@ onMounted(async () => {
     <h1 class="text-h5 font-weight-bold mb-6">Dashboard</h1>
 
     <VRow class="mb-6">
-      <VCol cols="12" sm="6" lg="3">
+      <VCol cols="12" sm="6" lg="4">
         <VCard>
           <VCardText class="d-flex align-center gap-3">
-            <VAvatar color="primary" variant="tonal" size="48">
-              <VIcon icon="ri-user-3-line" size="24" />
+            <VAvatar color="success" variant="tonal" size="48">
+              <VIcon icon="ri-arrow-up-circle-line" size="24" />
             </VAvatar>
             <div>
-              <div class="text-caption text-medium-emphasis">Total Users</div>
-              <div class="text-h5 font-weight-bold">{{ userStore.users.length }}</div>
+              <div class="text-caption text-medium-emphasis">Total Income</div>
+              <div class="text-h5 font-weight-bold text-success">
+                {{ formatCurrency(totalIncome) }}
+              </div>
+            </div>
+          </VCardText>
+        </VCard>
+      </VCol>
+
+      <VCol cols="12" sm="6" lg="4">
+        <VCard>
+          <VCardText class="d-flex align-center gap-3">
+            <VAvatar color="error" variant="tonal" size="48">
+              <VIcon icon="ri-arrow-down-circle-line" size="24" />
+            </VAvatar>
+            <div>
+              <div class="text-caption text-medium-emphasis">Total Expenses</div>
+              <div class="text-h5 font-weight-bold text-error">
+                {{ formatCurrency(totalExpense) }}
+              </div>
+            </div>
+          </VCardText>
+        </VCard>
+      </VCol>
+
+      <VCol cols="12" sm="6" lg="4">
+        <VCard>
+          <VCardText class="d-flex align-center gap-3">
+            <VAvatar
+              :color="balance >= 0 ? 'primary' : 'warning'"
+              variant="tonal"
+              size="48"
+            >
+              <VIcon icon="ri-wallet-3-line" size="24" />
+            </VAvatar>
+            <div>
+              <div class="text-caption text-medium-emphasis">Balance</div>
+              <div
+                class="text-h5 font-weight-bold"
+                :class="balance >= 0 ? 'text-primary' : 'text-warning'"
+              >
+                {{ formatCurrency(balance) }}
+              </div>
             </div>
           </VCardText>
         </VCard>
@@ -37,28 +101,47 @@ onMounted(async () => {
     </VRow>
 
     <VRow>
-      <VCol cols="12" md="6">
-        <VCard title="Recent Users">
+      <VCol cols="12">
+        <VCard title="Recent Transactions">
           <VList lines="two">
             <VListItem
-              v-for="user in userStore.users.slice(0, 5)"
-              :key="user.id"
+              v-for="tx in transactions.slice(0, 10)"
+              :key="tx.id"
             >
               <template #prepend>
-                <VAvatar color="primary" variant="tonal" size="36">
-                  <VIcon icon="ri-user-3-line" size="18" />
+                <VAvatar
+                  :color="tx.type === 'income' ? 'success' : 'error'"
+                  variant="tonal"
+                  size="36"
+                >
+                  <VIcon
+                    :icon="tx.type === 'income' ? 'ri-arrow-up-line' : 'ri-arrow-down-line'"
+                    size="18"
+                  />
                 </VAvatar>
               </template>
-              <VListItemTitle>{{ user.name }}</VListItemTitle>
-              <VListItemSubtitle>{{ user.email }}</VListItemSubtitle>
+              <VListItemTitle>
+                <div class="d-flex justify-space-between">
+                  <span>{{ getCategoryName(tx.categoryId) }}</span>
+                  <span
+                    :class="tx.type === 'income' ? 'text-success font-weight-bold' : 'text-error font-weight-bold'"
+                  >
+                    {{ tx.type === 'income' ? '+' : '-' }}{{ formatCurrency(tx.amount) }}
+                  </span>
+                </div>
+              </VListItemTitle>
+              <VListItemSubtitle>
+                {{ formatDate(tx.date) }}
+                <template v-if="tx.description"> — {{ tx.description }}</template>
+              </VListItemSubtitle>
             </VListItem>
-            <VListItem v-if="userStore.users.length === 0" class="text-center text-medium-emphasis py-4">
-              No users yet.
+            <VListItem v-if="transactions.length === 0" class="text-center text-medium-emphasis py-4">
+              No transactions yet. Start by adding your first one!
             </VListItem>
           </VList>
           <VCardActions>
-            <RouterLink :to="{ name: 'user-page' }">
-              <VBtn variant="text" size="small">View all users</VBtn>
+            <RouterLink :to="{ name: 'transaction-page' }">
+              <VBtn variant="text" size="small">View all transactions</VBtn>
             </RouterLink>
           </VCardActions>
         </VCard>
